@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Page Analyzer</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Web Page Analyzer</h1>
+        <p>Enter a URL to analyze its HTML structure and links.</p>
+
+        <form action="/" method="POST">
+            <input type="url" name="url" placeholder="https://example.com" value="{{.URL}}" required>
+            <button type="submit">Analyze</button>
+        </form>
+
+        {{if .Error}}
+            <div class="error">
+                <strong>Error:</strong> {{.Error}}
+            </div>
+        {{end}}
+
+        {{if .Results}}
+            <div class="results">
+                <h2>Analysis for: <a href="{{.URL}}" target="_blank">{{.URL}}</a></h2>
+                <ul>
+                    <li><strong>HTML Version:</strong> <span>{{.Results.HTMLVersion}}</span></li>
+                    <li><strong>Page Title:</strong> <span>{{.Results.Title}}</span></li>
+                    <li>
+                        <strong>Heading Counts:</strong>
+                        <span>
+                            {{range $level, $count := .Results.Headings}}
+                                {{$level}}: {{$count}} &nbsp;
+                            {{else}}
+                                None found.
+                            {{end}}
+                        </span>
+                    </li>
+                    <li><strong>Internal Links:</strong> <span>{{.Results.Links.InternalCount}}</span></li>
+                    <li><strong>External Links:</strong> <span>{{.Results.Links.ExternalCount}}</span></li>
+                    <li><strong>Inaccessible Links:</strong> <span>{{.Results.Links.InaccessibleCount}}</span></li>
+                    <li><strong>Contains Login Form:</strong> <span>{{.Results.ContainsLoginForm}}</span></li>
+                </ul>
+            </div>
+        {{end}}
+    </div>
+</body>
+</html>
