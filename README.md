@@ -1,1 +1,185 @@
-# web-analyzer
+# Web Analyzer
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/lalithyawiki/web-analyzer)](https://goreportcard.com/report/github.com/lalithyawiki/web-analyzer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lalithyawiki/web-analyzer)](https://golang.org)
+[![Issues](https://img.shields.io/github/issues/lalithyawiki/web-analyzer)](https://github.com/lalithyawiki/web-analyzer/issues)
+[![Forks](https://img.shields.io/github/forks/lalithyawiki/web-analyzer)](https://github.com/lalithyawiki/web-analyzer/network/members)
+[![Stars](https://img.shields.io/github/stars/lalithyawiki/web-analyzer)](https://github.com/lalithyawiki/web-analyzer/stargazers)
+
+An efficient and powerful tool to analyze web pages, built with Go. This project provides a detailed analysis of a given URL, including its HTML structure, SEO metrics, and more.
+
+## Table of Contents
+
+- [About The Project](#about-the-project)
+  - [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+- [Docker](#docker)
+- [Project Structure](#project-structure)
+- [Challenges, Assumptions and Learnings](#challenges-assumptions-and-learnings)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgements](#acknowledgements)
+
+## About The Project
+
+Web Analyzer is a tool with a web interface that allows you to get a comprehensive analysis of any website. It's built with Go for performance and provides a clean and easy-to-understand report.
+
+This tool is perfect for:
+* Web developers who want to quickly inspect the technical details of a webpage.
+* SEO specialists looking to analyze on-page SEO factors.
+* Anyone curious about the inner workings of a website.
+
+### Built With
+
+This project is built with the following technologies:
+
+* [Go](https://golang.org/)
+* Standard HTML/CSS/JS for the UI
+
+## Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+Make sure you have the following installed:
+* [Go](https://golang.org/dl/) (version 1.18 or higher)
+* [Docker](https://www.docker.com/get-started) (optional, for containerized deployment)
+
+### Installation
+
+1.  Clone the repo
+    ```sh
+    git clone [https://github.com/lalithyawiki/web-analyzer.git](https://github.com/lalithyawiki/web-analyzer.git)
+    ```
+2.  Navigate to the project directory
+    ```sh
+    cd web-analyzer
+    ```
+3.  Build the application
+    ```sh
+    go build -o ./cmd/web-analyzer ./cmd
+    ```
+
+## Usage
+
+You can use Web Analyzer directly from the command line.
+
+**To start the web interface:**
+```sh
+./cmd/web-analyzer
+```
+This will start a local web server (by default on port 8080). You can then open your browser to `http://localhost:8080` to use the web-based UI.
+
+### Web Interface Screenshot
+![Web Analyzer UI Screenshot](./assets/screenshot.png)
+
+
+## Docker
+
+You can also run the application using Docker.
+
+1.  Build the Docker image:
+    ```sh
+    docker build -t web-analyzer .
+    ```
+2.  Run the container:
+    ```sh
+    docker run -p 8080:8080 web-analyzer
+    ```
+
+## Project Structure
+
+```
+.
+├── cmd/                 # Main application entry point
+├── internal/            # Private application and library code
+│   └── analyzer/        # Core analysis logic
+├── ui/                  # Web interface files (HTML, CSS)
+├── .gitignore
+├── Dockerfile
+├── go.mod
+├── go.sum
+└── LICENSE
+```
+
+## Challenges, Assumptions and Learnings
+
+This project was a great learning experience. Here are some of the key challenges I encountered and how I overcame them:
+
+* **Challenge: Managing time**
+    * **Problem:** Allocating time for this project
+    * **Solution:** I am new to Go lang. I have more experience in MERN and .Net stacks. However, I had some basic syntax knowledge about Go. In this project I had to deep dive in to the language to work on this project within 10 days while I am doing my daily full time job with my personnel commitments as well. What I did was finding easy but solid paths to do the project. Ex: finding a library for html parsing. I have explained it below. Most time I spent on understadning concurrency in Go. 
+
+* **Challenge: Deciding app architecture**
+    * **Problem:** Which architecture to be chosen
+    * **Solution:** Since this applications user base is unclear the scalability expectations are unclear. Therefore, I assumed this is a startup with less or nor userbase. On that note I decided to write a monalithic app with clear boundaries. I have explained the structure of the project here. This structure is made with the future scalability plans in mind. Ex: Easily taking ui content and putting them in a react application and creating a backend API with the logic inside internal folder. 
+
+* **Challenge: Parsing Complex HTML Structures**
+    * **Problem:** Selecting the most suitable way to parse html
+    * **Solution:** I had to select most simple, powerful and less time consuming way to parse the html since I had to manage the limited time I got to implement this. I tried Go's `net/html` package initially. Even though it was really powerful it was adding more complexities to the code and Since I am new to Go, I had to spend more time understading the library. I decided to go for a wrapper around this package to achive my goal with the time I got. Therefore, I went with `goquery`. Since it had a good community and simple interface it was easy to learn and implement. 
+
+* **Challenge: Handling concurrency**
+    * **Problem:** Making link accessibility check faster
+    * **Solution:** Initially I had a synchrous synchronous way of executing for accessibility check. However, it works fine if there are very limited number of web urls. It is not gurateed that how much links we are getting. The response times go really high due to that. Therefore, I learned about Go routines, channels and worker groups. Then I implemented a model that works concurrently when checking the links. I made app more faster.
+
+
+## Roadmap
+
+Here are some ideas for future improvements:
+
+- [ ] **Integrate https:** This is the first thing we need to do as the next step to make the app more secure for use.
+- [ ] **Support user accounts:** This will help us to understand the users and their app usage patterns.
+- [ ] **Historical Analysis:** Allow users to save analysis and compare them over time.
+- [ ] **Change the architecture based on the scalability requirements:** Proposed architecture is shown below
+- [ ] **Integrate tool to track app matrics:** Currently we are using extensive logs to track what is happening with the app. But it is better to introduce a tool like datadog or promethious.
+- [ ] **Test plan:** Creating a plan about how to test different functions using different testing methods and test percentages to maintain is important. Running tests in the dev pipeline is equally important.
+- [ ] **CI/CD:** Creating a proper CI/CD pipeline by integrating code quality gates like SonarCube is better.
+- [ ] **Accessibility Analysis:** Integrate checks for WCAG compliance.
+- [ ] **Performance Metrics:** Include detailed performance scores, similar to Google Lighthouse.
+- [ ] **Technology Stack Detection:** Identify frameworks and libraries used on a page.
+- [ ] **Export Reports:** Add functionality to export the analysis to PDF or JSON.
+
+### Proposed Architecture
+![Web Analyzer UI Screenshot](./assets/proposed-architecture.png)
+
+
+See the [open issues](https://github.com/lalithyawiki/web-analyzer/issues) for a full list of proposed features (and known issues).
+
+## Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". For more detailed guidelines, please see the `CONTRIBUTING.md` file (to be created).
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## Code of Conduct
+
+To ensure a welcoming and inclusive environment, this project adheres to the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Please read it to understand the expectations for all contributors.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Contact
+
+Lalithya - [@lalithyawiki](https://twitter.com/lalithyawiki)
+
+Project Link: [https://github.com/lalithyawiki/web-analyzer](https://github.com/lalithyawiki/web-analyzer)
+
+## Acknowledgements
+
+* [Go Team](https://golang.org/)
+* [README Template by Othneil Drew](https://github.com/othneildrew/Best-README-Template)

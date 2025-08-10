@@ -1,20 +1,24 @@
-
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
-COPY vendor ./vendor
+
+RUN go mod download
+RUN go mod verify
+
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -ldflags="-w -s" -o /analyzer-app ./main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-w -s" -o /analyzer-app ./cmd/main.go
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /analyzer-app .
-COPY --from=builder /app/templates ./templates
+COPY --from=builder /analyzer-app ./bin/analyzer-app
+COPY --from=builder /app/ui ./ui
+
+WORKDIR /app/bin
 
 EXPOSE 8080
 

@@ -1,16 +1,17 @@
 package main
 
 import (
+	"context"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
 	"runtime/debug"
-	"web-analyzer/analyzer"
+	"web-analyzer/internal/analyzer"
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("static"))
+	fs := http.FileServer(http.Dir("../ui/static"))
 
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", handleRequest)
@@ -34,7 +35,7 @@ func clientError(w http.ResponseWriter, status int, message string) {
 	http.Error(w, message, status)
 }
 
-var tmpl = template.Must(template.ParseFiles("templates/index.html"))
+var tmpl = template.Must(template.ParseFiles("../ui/html/index.html"))
 
 func serverError(w http.ResponseWriter, err error) {
 	trace := string(debug.Stack())
@@ -53,7 +54,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		urlToAnalyze := r.FormValue("url")
 		data.URL = urlToAnalyze
-		results, err := analyzer.AnalyzePage(urlToAnalyze)
+		logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ctx := context.Background()
+		results, err := analyzer.AnalyzePage(ctx, logger, urlToAnalyze)
 		if err != nil {
 			slog.Warn("Analysis failed for URL", "url", urlToAnalyze, "error", err)
 			data.Error = "Failed to analyze the page. The URL might be unreachable or the content invalid."
