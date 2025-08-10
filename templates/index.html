@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Page Analyzer</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         <h1>Web Page Analyzer</h1>
         <p>Enter a URL to analyze its HTML structure and links.</p>
 
-        <form action="/" method="POST">
+        <form id="analyzeForm" action="/" method="POST">
             <input type="url" name="url" placeholder="https://example.com" value="{{.URL}}" required>
             <button type="submit">Analyze</button>
         </form>
@@ -45,5 +46,19 @@
             </div>
         {{end}}
     </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+        <p>Analyzing, please wait...</p>
+    </div>
+
+    <script>
+        const form = document.getElementById('analyzeForm');
+        const loader = document.getElementById('loader');
+
+        form.addEventListener('submit', () => {
+            loader.style.display = 'flex';
+        });
+    </script>
 </body>
 </html>

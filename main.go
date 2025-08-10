@@ -10,6 +10,9 @@ import (
 )
 
 func main() {
+	fs := http.FileServer(http.Dir("static"))
+
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", handleRequest)
 
 	slog.Info("Server starting...", "addr", ":8080")
