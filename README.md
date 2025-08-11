@@ -19,6 +19,7 @@ An efficient and powerful tool to analyze web pages, built with Go. This project
 - [Usage](#usage)
 - [Docker](#docker)
 - [Project Structure](#project-structure)
+- [Testing](#testing)
 - [Challenges, Assumptions and Learnings](#challenges-assumptions-and-learnings)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -42,6 +43,9 @@ This project is built with the following technologies:
 
 * [Go](https://golang.org/)
 * Standard HTML/CSS/JS for the UI
+* [goquery](https://github.com/PuerkitoBio/goquery)
+* [Docker](https://www.docker.com/)
+* [make](https://www.make.com/)
 
 ## Getting Started
 
@@ -74,7 +78,10 @@ You can use Web Analyzer directly from the command line.
 
 **To start the web interface:**
 ```sh
-./cmd/web-analyzer
+cd ./cmd
+```
+```sh
+./web-analyzer
 ```
 This will start a local web server (by default on port 8080). You can then open your browser to `http://localhost:8080` to use the web-based UI.
 
@@ -95,6 +102,28 @@ You can also run the application using Docker.
     docker run -p 8080:8080 web-analyzer
     ```
 
+## Testing
+
+You can also run the application using Docker.
+
+Run all unit tests:
+```sh
+make test
+```
+or run this in the root folder
+```sh
+go test -v ./...
+```
+
+See the unit test coverage:
+```sh
+make coverage
+```
+or run this in the root folder
+```sh
+go test -coverprofile=coverage.out ./...
+```
+
 ## Project Structure
 
 ```
@@ -108,28 +137,24 @@ You can also run the application using Docker.
 ├── go.mod
 ├── go.sum
 └── LICENSE
+└── Makefile
 ```
 
 ## Challenges, Assumptions and Learnings
 
 This project was a great learning experience. Here are some of the key challenges I encountered and how I overcame them:
 
-* **Challenge: Managing time**
-    * **Problem:** Allocating time for this project
-    * **Solution:** I am new to Go lang. I have more experience in MERN and .Net stacks. However, I had some basic syntax knowledge about Go. In this project I had to deep dive in to the language to work on this project within 10 days while I am doing my daily full time job with my personnel commitments as well. What I did was finding easy but solid paths to do the project. Ex: finding a library for html parsing. I have explained it below. Most time I spent on understadning concurrency in Go. 
-
 * **Challenge: Deciding app architecture**
     * **Problem:** Which architecture to be chosen
-    * **Solution:** Since this applications user base is unclear the scalability expectations are unclear. Therefore, I assumed this is a startup with less or nor userbase. On that note I decided to write a monalithic app with clear boundaries. I have explained the structure of the project here. This structure is made with the future scalability plans in mind. Ex: Easily taking ui content and putting them in a react application and creating a backend API with the logic inside internal folder. 
+    * **Solution:** I assumed this application is built for a startup. Therefore, I went with a simple solution first. In this way I can add more value to the core product with the limited time I got. Based on the scalability requirements and the resources we got we can improve the application architecture accordinglly in the future. For this reason I went with a monalithic application with clear boundaries like ui, cmd and internal structure. For an example if it is needed in the future we can move ui code to a framework like react easily and rest of the code can be kept in the backend by exposing an API to the client.  
 
 * **Challenge: Parsing Complex HTML Structures**
     * **Problem:** Selecting the most suitable way to parse html
-    * **Solution:** I had to select most simple, powerful and less time consuming way to parse the html since I had to manage the limited time I got to implement this. I tried Go's `net/html` package initially. Even though it was really powerful it was adding more complexities to the code and Since I am new to Go, I had to spend more time understading the library. I decided to go for a wrapper around this package to achive my goal with the time I got. Therefore, I went with `goquery`. Since it had a good community and simple interface it was easy to learn and implement. 
+    * **Solution:** I had to select most simple, powerful and less time consuming way to parse the html since I had to manage the limited time I got to implement this. I tried Go's `net/html` package initially. Even though it was really powerful it was adding more complexities to the code. I decided to go for a wrapper around this package to achieve my goal with the time I got. Therefore, I went with `goquery`. Since it had a good community and simple interface, it was easy to learn and implement. 
 
 * **Challenge: Handling concurrency**
     * **Problem:** Making link accessibility check faster
-    * **Solution:** Initially I had a synchrous synchronous way of executing for accessibility check. However, it works fine if there are very limited number of web urls. It is not gurateed that how much links we are getting. The response times go really high due to that. Therefore, I learned about Go routines, channels and worker groups. Then I implemented a model that works concurrently when checking the links. I made app more faster.
-
+    * **Solution:** Initially I had a synchrous synchronous way of executing for accessibility check. However, it works fine if there are very limited number of web urls. It is not guranteed that how much links we are getting. The response times go really high due to that. Therefore, I learned about Go routines, channels and worker groups. Then I implemented a model that works concurrently when checking the links. Response times were dropped due to this.
 
 ## Roadmap
 

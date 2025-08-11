@@ -216,3 +216,20 @@ func detectLoginForm(ctx context.Context, logger *slog.Logger, doc *goquery.Docu
 	logger.InfoContext(ctx, "Login form detection finished", slog.Bool("login_form_found", isLoginForm))
 	return isLoginForm, nil
 }
+
+func isValidURL(toTest string) bool {
+	u, err := url.Parse(toTest)
+	if err != nil {
+		return false
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
+
+	if u.Host == "" || !strings.Contains(u.Host, ".") {
+		return false
+	}
+
+	return true
+}

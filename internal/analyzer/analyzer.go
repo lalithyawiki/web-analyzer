@@ -13,7 +13,14 @@ func AnalyzePage(ctx context.Context, logger *slog.Logger, pageURL string) (*Ana
 	logger = logger.With(slog.String("Analyzing page url", pageURL))
 	logger.DebugContext(ctx, "Starting page analysis")
 
-	// --- 1. Load Web Page ---
+	// -- 1. Validate url ---
+	isvValid := isValidURL(pageURL)
+	if !isvValid {
+		logger.ErrorContext(ctx, "Invalid page Url")
+		return nil, fmt.Errorf("invalid page Url")
+	}
+
+	// --- 2. Load Web Page ---
 	data, err := loadWebPage(ctx, logger, pageURL)
 	if err != nil {
 		logger.ErrorContext(ctx, "Failed to load web page", slog.Any("error", err))
@@ -31,7 +38,7 @@ func AnalyzePage(ctx context.Context, logger *slog.Logger, pageURL string) (*Ana
 		Headings: make(map[string]int),
 	}
 
-	// --- 2. Run All Analyses ---
+	// --- 3. Run All Analyses ---
 	logger.DebugContext(ctx, "Beginning individual analyses")
 
 	// HTML Version
@@ -60,7 +67,7 @@ func AnalyzePage(ctx context.Context, logger *slog.Logger, pageURL string) (*Ana
 	failedLinks, _ := validateLinkAccessibility(ctx, logger, linkAnalysis)
 	result.Links.InaccessibleCount = len(failedLinks)
 
-	// --- 3. Final Summary Log ---
+	// --- 4. Final Summary Log ---
 	logger.InfoContext(ctx, "Page analysis complete",
 		slog.Group("results",
 			slog.String("html_version", result.HTMLVersion),
