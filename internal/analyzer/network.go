@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"math"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 const (
 	maxRetries     = 3
 	initialBackoff = 1 * time.Second
+	numWorkers     = 10
 )
 
 var client = &http.Client{
@@ -31,6 +33,8 @@ func loadWebPage(ctx context.Context, logger *slog.Logger, pageURL string) (*htt
 		logger.DebugContext(ctx, "Attempting to fetch page", slog.Int("attempt", attempt))
 
 		data, err = http.Get(pageURL)
+
+		fmt.Println(data)
 
 		if err == nil && data.StatusCode >= 200 && data.StatusCode < 300 {
 			logger.InfoContext(
@@ -66,18 +70,27 @@ func loadWebPage(ctx context.Context, logger *slog.Logger, pageURL string) (*htt
 		}
 	}
 
-	logger.ErrorContext(
-		ctx,
-		"Failed to fetch page after all attempts",
-		slog.Int("max_retries", maxRetries),
-		slog.Any("last_error", err),
-	)
-	return nil, err
+	if data != nil && err == nil {
+		issue := fmt.Errorf("access denied to the page %v", data)
+		logger.ErrorContext(
+			ctx,
+			"Failed to fetch page after all attempts",
+			slog.Int("max_retries", maxRetries),
+			slog.Any("last_error", issue),
+		)
+		return nil, issue
+	} else {
+		logger.ErrorContext(
+			ctx,
+			"Failed to fetch page after all attempts",
+			slog.Int("max_retries", maxRetries),
+			slog.Any("last_error", err),
+		)
+		return nil, err
+	}
 }
 
-func linkAccessibilityChecker(ctx context.Context, logger *slog.Logger, url string, wg *sync.WaitGroup, inaccessibleLinks chan<- string) {
-	defer wg.Done()
-
+func linkAccessibilityChecker(ctx context.Context, logger *slog.Logger, url string, inaccessibleLinks chan<- string) {
 	logger = logger.With(slog.String("url", url))
 	logger.DebugContext(ctx, "Starting link check")
 
@@ -126,6 +139,13 @@ func linkAccessibilityChecker(ctx context.Context, logger *slog.Logger, url stri
 	inaccessibleLinks <- url
 }
 
+func linkAccessibilityCheckWorker(ctx context.Context, logger *slog.Logger, wg *sync.WaitGroup, jobs <-chan string, inaccessibleLinks chan<- string) {
+	defer wg.Done()
+	for url := range jobs {
+		linkAccessibilityChecker(ctx, logger, url, inaccessibleLinks)
+	}
+}
+
 func validateLinkAccessibility(ctx context.Context, logger *slog.Logger, analysis LinkAnalysis) ([]string, error) {
 	logger.DebugContext(ctx, "Setting up link check process")
 
@@ -138,16 +158,33 @@ func validateLinkAccessibility(ctx context.Context, logger *slog.Logger, analysi
 	totalLinks := len(pageLinks)
 	logger.InfoContext(ctx, "Starting to check links", slog.Int("total_links", totalLinks))
 
-	var wg sync.WaitGroup
+	jobs := make(chan string, totalLinks)
 	inaccessibleLinks := make(chan string, totalLinks)
 
-	for _, link := range pageLinks {
-		wg.Add(1)
-		go linkAccessibilityChecker(ctx, logger, link, &wg, inaccessibleLinks)
+	var wg sync.WaitGroup
+
+	// Prevent creating unnecessary additional workers
+	if totalLinks < numWorkers {
+		for w := 1; w <= totalLinks; w++ {
+			wg.Add(1)
+			go linkAccessibilityCheckWorker(ctx, logger, &wg, jobs, inaccessibleLinks)
+		}
+	} else {
+		for w := 1; w <= numWorkers; w++ {
+			wg.Add(1)
+			go linkAccessibilityCheckWorker(ctx, logger, &wg, jobs, inaccessibleLinks)
+		}
 	}
 
-	wg.Wait()
-	close(inaccessibleLinks)
+	for _, link := range pageLinks {
+		jobs <- link
+	}
+	close(jobs)
+
+	go func() {
+		wg.Wait()
+		close(inaccessibleLinks)
+	}()
 
 	var failedLinks []string
 	for link := range inaccessibleLinks {

@@ -146,15 +146,15 @@ This project was a great learning experience. Here are some of the key challenge
 
 * **Challenge: Deciding app architecture**
     * **Problem:** Which architecture to be chosen
-    * **Solution:** I assumed this application is built for a startup. Therefore, I went with a simple solution first. In this way I can add more value to the core product with the limited time I got. Based on the scalability requirements and the resources we got we can improve the application architecture accordinglly in the future. For this reason I went with a monalithic application with clear boundaries like ui, cmd and internal structure. For an example if it is needed in the future we can move ui code to a framework like react easily and rest of the code can be kept in the backend by exposing an API to the client.  
+    * **Solution:** I assumed this application is built for a startup. Therefore, I went with a simple solution first. In this way I can add more value to the core product with the limited time I got. Based on the scalability requirements and the resources we got we can improve the application architecture accordinglly in the future.   For this reason I went with a monalithic application with clear boundaries like ui, cmd and internal structure. For an example if it is needed in the future we can move ui code to a framework like `React` easily and rest of the code can be kept in the backend by exposing an API to the client.  
 
 * **Challenge: Parsing Complex HTML Structures**
     * **Problem:** Selecting the most suitable way to parse html
-    * **Solution:** I had to select most simple, powerful and less time consuming way to parse the html since I had to manage the limited time I got to implement this. I tried Go's `net/html` package initially. Even though it was really powerful it was adding more complexities to the code. I decided to go for a wrapper around this package to achieve my goal with the time I got. Therefore, I went with `goquery`. Since it had a good community and simple interface, it was easy to learn and implement. 
+    * **Solution:** I had to select most simple, powerful and less time consuming way to parse the html since I had to manage the limited time I got to implement this. I tried Go's `net/html` package initially.  Even though it was really powerful it was adding more complexities to the code. I decided to go for a wrapper around this package to achieve my goal with the time I got. Therefore, I went with `goquery`. Since it had a good community and simple interface, it was easy to learn and implement. 
 
 * **Challenge: Handling concurrency**
     * **Problem:** Making link accessibility check faster
-    * **Solution:** Initially I had a synchrous synchronous way of executing for accessibility check. However, it works fine if there are very limited number of web urls. It is not guranteed that how much links we are getting. The response times go really high due to that. Therefore, I learned about Go routines, channels and worker groups. Then I implemented a model that works concurrently when checking the links. Response times were dropped due to this.
+    * **Solution:** Initially I had a synchrous synchronous way of executing for accessibility check. However, it works fine if there are very limited number of web urls. It is not guranteed that how much links we are getting. The response times go really high due to that. Therefore, I learned about Go routines, channels and worker groups. Then I implemented a model that works concurrently when checking the links. Response times were dropped due to this. <br /> I created a go routine for each link in the page to check its accessibility initially. But then I realized if a web page has thousands of links and if we create a go routine for each link it will be a huge impact on the processor and this can lead for app crashes since it is very unpredictable. <br /> Therefore, I created a worker pool. Number of workers can be configured. Only that amount of worker go routines will check the links for the accessibility. This approach stops all the issues I mentioned before. 
 
 ## Roadmap
 
@@ -174,35 +174,6 @@ Here are some ideas for future improvements:
 
 ### Proposed Architecture
 ![Web Analyzer UI Screenshot](./assets/proposed-architecture.png)
-
-
-See the [open issues](https://github.com/lalithyawiki/web-analyzer/issues) for a full list of proposed features (and known issues).
-
-## Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". For more detailed guidelines, please see the `CONTRIBUTING.md` file (to be created).
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## Code of Conduct
-
-To ensure a welcoming and inclusive environment, this project adheres to the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Please read it to understand the expectations for all contributors.
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Contact
-
-Lalithya - [@lalithyawiki](https://twitter.com/lalithyawiki)
-
-Project Link: [https://github.com/lalithyawiki/web-analyzer](https://github.com/lalithyawiki/web-analyzer)
 
 ## Acknowledgements
 
